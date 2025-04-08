@@ -21,7 +21,7 @@ git clone https://github.com/jdkuffa/cs420-assignment2.git
 2. Navigate into the repository:
 
 ```
-cd cs420-assignment1
+cd cs420-assignment2
 ```
 
 3. Set up a virtual environment and activate it:
