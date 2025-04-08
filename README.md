@@ -78,6 +78,6 @@ This program fine-tunes the pre-trained CodeT5-small Transformer model from Hugg
 python main.py
 ```
 
-## 3. Report
+# 3. Report
 
 The assignment report is available in the file "Assignment_Report.pdf."
