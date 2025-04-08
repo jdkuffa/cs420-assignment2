@@ -1,8 +1,15 @@
 # CS420 Assignment 2: Fine-Tuning CodeT5 for Predicting if Statements
 
-# **1. Introduction**  
+# **1. Introduction** 
+
+This assignment explores **fine-tuning transformer models** for **code completion**, specifically for fine-tuning the small version of CodeT5, known as codet5-small, which contains
+approximately 60 million parameters, for the task of predicting missing if conditions in Python functions. 
+
+The model will take as input a function containing a special token masking a single if condition and will attempt to predict it. Our work included preparing the dataset consisting of 50,000 training samples by masking the if conditions and flattening it, tokenizing the input using a pre-trained tokenizer, and training the model on this data.
 
 # **2. Getting Started**  
+
+This project is implemented in **Python 3.9+** and is compatible with **macOS, Linux, and Windows**.  
 
 ## **2.1 Preparations**  
 
@@ -63,7 +70,7 @@ pip install -r requirements.txt
 
 ## **2.3 Run Program**
 
-(1) Run ```main.py```
+1. Run ```main.py```
 
 This program fine-tunes the pre-trained CodeT5-small Transformer model from Hugging Face to automatically recommend suitable if statements in Python functions. After preparing the dataset by masking the if conditions and tokenize the input using Hugging Face's pre-trained AutoTokenizer, the model is trained and fine-tuned on this data and evaluated using multiple evaluation metrics, including exact match, BLEU & CodeBLEU.
 
