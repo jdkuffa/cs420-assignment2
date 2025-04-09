@@ -1,0 +1,695 @@
+cleaned_method,target_block,tokens_in_method
+"def read(self, count=True, timeout=None, ignore_non_errors=True, ignore_timeouts=True):
+    try:
+        return self._read(count, timeout)
+    except usb.USBError as e:
+        if DEBUG_COMM:
+            log.info(
+                ""read: e.errno=%s e.strerror=%s e.message=%s repr=%s""
+                % (e.errno, e.strerror, e.message, repr(e))
+            )
+        if ignore_timeouts and is_timeout(e):
+            return []
+        if ignore_non_errors and is_noerr(e):
+            return []
+        raise
+",if ignore_timeouts and is_timeout ( e ) :,174
+"def _cache_mem(curr_out, prev_mem, mem_len, reuse_len=None):
+    """"""cache hidden states into memory.""""""
+    if mem_len is None or mem_len == 0:
+        return None
+    else:
+        if reuse_len is not None and reuse_len > 0:
+            curr_out = curr_out[:reuse_len]
+        if prev_mem is None:
+            new_mem = curr_out[-mem_len:]
+        else:
+            new_mem = tf.concat([prev_mem, curr_out], 0)[-mem_len:]
+    new_mem.stop_gradient = True
+    return new_mem
+",if prev_mem is None :,165
+"def filtered(gen):
+    for example in gen:
+        example_len = length_fn(example)
+        # Checking max length boundary.
+        if max_length is not None:
+            if example_len > max_length:
+                continue
+        # Checking min length boundary.
+        if min_length is not None:
+            if example_len < min_length:
+                continue
+        # Within bounds.
+        yield example
+",if example_len > max_length :,117
+"def search(self, query):
+    # ""Search.ashx?query="" + query + filterVal
+    if not query:
+        logger.debug(""Empty search query"")
+        return []
+    logger.debug('Searching TuneIn for ""%s""' % query)
+    args = ""&query="" + query
+    search_results = self._tunein(""Search.ashx"", args)
+    results = []
+    for item in self._flatten(search_results):
+        if item.get(""type"", """") == ""audio"":
+            # Only return stations
+            self._stations[item[""guide_id""]] = item
+            results.append(item)
+    return results
+","if item . get ( ""type"" , """" ) == ""audio"" :",163
+"def _check_script(self, script, directive):
+    for var in compile_script(script):
+        if var.must_contain(""/""):
+            # Skip variable checks
+            return False
+        if var.can_contain("".""):
+            # Yay! Our variable can contain any symbols!
+            reason = (
+                'At least variable ""${var}"" can contain untrusted user input'.format(
+                    var=var.name
+                )
+            )
+            self.add_issue(directive=[directive] + var.providers, reason=reason)
+            return True
+    return False
+","if var . must_contain ( ""/"" ) :",157
+"def getAllDataLinkIDs():
+    linkDataIDs = set()
+    dataType = _forestData.dataTypeBySocket
+    for socketID, linkedIDs in _forestData.linkedSockets.items():
+        for linkedID in linkedIDs:
+            if socketID[1]:  # check which one is origin/target
+                linkDataIDs.add(
+                    (socketID, linkedID, dataType[socketID], dataType[linkedID])
+                )
+            else:
+                linkDataIDs.add(
+                    (linkedID, socketID, dataType[linkedID], dataType[socketID])
+                )
+    return linkDataIDs
+",if socketID [ 1 ] :,174
+"def _stderr_supports_color():
+    try:
+        if hasattr(sys.stderr, ""isatty"") and sys.stderr.isatty():
+            if curses:
+                curses.setupterm()
+                if curses.tigetnum(""colors"") > 0:
+                    return True
+            elif colorama:
+                if sys.stderr is getattr(
+                    colorama.initialise, ""wrapped_stderr"", object()
+                ):
+                    return True
+    except Exception:
+        # Very broad exception handling because it's always better to
+        # fall back to non-colored logs than to break at startup.
+        pass
+    return False
+","if curses . tigetnum ( ""colors"" ) > 0 :",170
+"def offsets(self):
+    offsets = {}
+    offset_so_far = 0
+    for name, ty in self.fields.items():
+        if isinstance(ty, SimTypeBottom):
+            l.warning(
+                ""Found a bottom field in struct %s. Ignore and increment the offset using the default ""
+                ""element size."",
+                self.name,
+            )
+            continue
+        if not self._pack:
+            align = ty.alignment
+            if offset_so_far % align != 0:
+                offset_so_far += align - offset_so_far % align
+        offsets[name] = offset_so_far
+        offset_so_far += ty.size // self._arch.byte_width
+    return offsets
+",if offset_so_far % align != 0 :,196
+"def Restore(self):
+    picker, obj = self._window, self._pObject
+    value = obj.RestoreValue(PERSIST_FILEDIRPICKER_PATH)
+    if value is not None:
+        if issubclass(picker.__class__, wx.FileDialog):
+            if type(value) == list:
+                value = value[-1]
+        picker.SetPath(value)
+        return True
+    return False
+",if type ( value ) == list :,102
+"def dt_s_tup_to_string(dt_s_tup):
+    dt_string = dt_s_tup[0]  # string for identifying the file to parse.
+    if dt_s_tup[1] > 0:  # if there are seasons in the model
+        if ""co"" in dt_string or ""ci"" in dt_string or ""nc"" in dt_string:
+            dt_string = dt_string[:2] + ""s"" + dt_string[2:]
+        else:
+            dt_string = ""s"" + dt_string
+    return dt_string
+","if ""co"" in dt_string or ""ci"" in dt_string or ""nc"" in dt_string :",146
+"def writer(stream, items):
+    sep = """"
+    for item in items:
+        stream.write(sep)
+        sep = "" ""
+        if not isinstance(item, str):
+            item = str(item)
+        if not PY3K:
+            if not isinstance(item, unicode):
+                item = str(item)
+        stream.write(item)
+    stream.write(""\n"")
+","if not isinstance ( item , str ) :",106
+"def _get_result_keys(self, config):
+    result_key = config.get(""result_key"")
+    if result_key is not None:
+        if not isinstance(result_key, list):
+            result_key = [result_key]
+        result_key = [jmespath.compile(rk) for rk in result_key]
+        return result_key
+","if not isinstance ( result_key , list ) :",92
+"def _download_build_artifacts(self, build: Dict[str, Any]) -> None:
+    arch = build[""arch_tag""]
+    snap_build = self._lp_load_url(build[""self_link""])
+    urls = snap_build.getFileUrls()
+    if not urls:
+        logger.error(f""Snap file not available for arch {arch!r}."")
+        return
+    for url in urls:
+        file_name = _get_url_basename(url)
+        self._download_file(url=url, dst=file_name)
+        if file_name.endswith("".snap""):
+            logger.info(f""Snapped {file_name}"")
+        else:
+            logger.info(f""Fetched {file_name}"")
+","if file_name . endswith ( "".snap"" ) :",187
+"def _add_custom_statement(self, custom_statements):
+    if custom_statements is None:
+        return
+    self.resource_policy[""Version""] = ""2012-10-17""
+    if self.resource_policy.get(""Statement"") is None:
+        self.resource_policy[""Statement""] = custom_statements
+    else:
+        if not isinstance(custom_statements, list):
+            custom_statements = [custom_statements]
+        statement = self.resource_policy[""Statement""]
+        if not isinstance(statement, list):
+            statement = [statement]
+        for s in custom_statements:
+            if s not in statement:
+                statement.append(s)
+        self.resource_policy[""Statement""] = statement
+",if s not in statement :,184
+"def display_failures_for_single_test(result: TestResult) -> None:
+    """"""Display a failure for a single method / endpoint.""""""
+    display_subsection(result)
+    checks = _get_unique_failures(result.checks)
+    for idx, check in enumerate(checks, 1):
+        message: Optional[str]
+        if check.message:
+            message = f""{idx}. {check.message}""
+        else:
+            message = None
+        example = cast(Case, check.example)  # filtered in `_get_unique_failures`
+        display_example(example, check.name, message, result.seed)
+        # Display every time except the last check
+        if idx != len(checks):
+            click.echo(""\n"")
+",if check . message :,188
+"def build(opt):
+    dpath = os.path.join(opt[""datapath""], ""qangaroo"")
+    version = ""v1.1""
+    if not build_data.built(dpath, version_string=version):
+        print(""[building data: "" + dpath + ""]"")
+        if build_data.built(dpath):
+            # An older version exists, so remove these outdated files.
+            build_data.remove_dir(dpath)
+        build_data.make_dir(dpath)
+        # Download the data.
+        for downloadable_file in RESOURCES:
+            downloadable_file.download_file(dpath)
+        # Mark the data as built.
+        build_data.mark_done(dpath, version_string=version)
+",if build_data . built ( dpath ) :,188
+"def call(self, step_input, states):
+    new_states = []
+    for i in range(self.num_layers):
+        out, new_state = self.lstm_cells[i](step_input, states[i])
+        step_input = (
+            layers.dropout(
+                out, self.dropout_prob, dropout_implementation=""upscale_in_train""
+            )
+            if self.dropout_prob > 0.0
+            else out
+        )
+        new_states.append(new_state)
+    return step_input, new_states
+",if self . dropout_prob > 0.0,148
+"def jupyter_progress_bar(min=0, max=1.0):
+    """"""Returns an ipywidget progress bar or None if we can't import it""""""
+    widgets = wandb.util.get_module(""ipywidgets"")
+    try:
+        if widgets is None:
+            # TODO: this currently works in iPython but it's deprecated since 4.0
+            from IPython.html import widgets  # type: ignore
+        assert hasattr(widgets, ""VBox"")
+        assert hasattr(widgets, ""Label"")
+        assert hasattr(widgets, ""FloatProgress"")
+        return ProgressWidget(widgets, min=min, max=max)
+    except (ImportError, AssertionError):
+        return None
+",if widgets is None :,168
+"def _record_event(self, path, fsevent_handle, filename, events, error):
+    with self.lock:
+        self.events[path].append(events)
+        if events | pyuv.fs.UV_RENAME:
+            if not os.path.exists(path):
+                self.watches.pop(path).close()
+",if events | pyuv . fs . UV_RENAME :,89
+"def _get_v1_id_from_tags(self, tags_obj, tag):
+    """"""Get image id from array of tags""""""
+    if isinstance(tags_obj, dict):
+        try:
+            return tags_obj[tag]
+        except KeyError:
+            pass
+    elif isinstance(tags_obj, []):
+        try:
+            for tag_dict in tags_obj:
+                if tag_dict[""name""] == tag:
+                    return tag_dict[""layer""]
+        except KeyError:
+            pass
+    return """"
+","if tag_dict [ ""name"" ] == tag :",142
+"def query_lister(domain, query="""", max_items=None, attr_names=None):
+    more_results = True
+    num_results = 0
+    next_token = None
+    while more_results:
+        rs = domain.connection.query_with_attributes(
+            domain, query, attr_names, next_token=next_token
+        )
+        for item in rs:
+            if max_items:
+                if num_results == max_items:
+                    raise StopIteration
+            yield item
+            num_results += 1
+        next_token = rs.next_token
+        more_results = next_token != None
+",if max_items :,166
+"def filter(this, args):
+    array = to_object(this, args.space)
+    callbackfn = get_arg(args, 0)
+    arr_len = js_arr_length(array)
+    if not is_callable(callbackfn):
+        raise MakeError(""TypeError"", ""callbackfn must be a function"")
+    _this = get_arg(args, 1)
+    k = 0
+    res = []
+    while k < arr_len:
+        if array.has_property(unicode(k)):
+            kValue = array.get(unicode(k))
+            if to_boolean(callbackfn.call(_this, (kValue, float(k), array))):
+                res.append(kValue)
+        k += 1
+    return args.space.ConstructArray(res)
+",if array . has_property ( unicode ( k ) ) :,194
+"def every_one_is(self, dst):
+    msg = ""all members of %r should be %r, but the %dth is %r""
+    for index, item in enumerate(self._src):
+        if self._range:
+            if index < self._range[0] or index > self._range[1]:
+                continue
+        error = msg % (self._src, dst, index, item)
+        if item != dst:
+            raise AssertionError(error)
+    return True
+",if item != dst :,124
+"def schedule_logger(job_id=None, delete=False):
+    if not job_id:
+        return getLogger(""fate_flow_schedule"")
+    else:
+        if delete:
+            with LoggerFactory.lock:
+                try:
+                    for key in LoggerFactory.schedule_logger_dict.keys():
+                        if job_id in key:
+                            del LoggerFactory.schedule_logger_dict[key]
+                except:
+                    pass
+            return True
+        key = job_id + ""schedule""
+        if key in LoggerFactory.schedule_logger_dict:
+            return LoggerFactory.schedule_logger_dict[key]
+        return LoggerFactory.get_schedule_logger(job_id)
+",if job_id in key :,198
+"def Tokenize(s):
+    # type: (str) -> Iterator[Token]
+    for item in TOKEN_RE.findall(s):
+        # The type checker can't know the true type of item!
+        item = cast(TupleStr4, item)
+        if item[0]:
+            typ = ""number""
+            val = item[0]
+        elif item[1]:
+            typ = ""name""
+            val = item[1]
+        elif item[2]:
+            typ = item[2]
+            val = item[2]
+        elif item[3]:
+            typ = item[3]
+            val = item[3]
+        yield Token(typ, val)
+",elif item [ 2 ] :,181
+"def _read_data_from_all_categories(self, directory, config, categories):
+    lines = []
+    for category in categories:
+        data_file = os.path.join(directory, _DATASET_VERSION, category, config)
+        if os.path.exists(data_file):
+            with open(data_file) as f:
+                ls = f.read().split(""\n"")
+                for l in ls[::-1]:
+                    if not l:
+                        ls.remove(l)
+                lines.extend(ls)
+    return lines
+",if os . path . exists ( data_file ) :,150
+"def find_handlers(self, forms):
+    handlers = {}
+    for form in forms.itervalues():
+        for action_name, _action_label in form.actions:
+            if action_name not in handlers:
+                handlers[action_name] = form
+            else:
+                raise HandlerError(
+                    ""More than one form defines the handler %s"" % action_name
+                )
+    return handlers
+",if action_name not in handlers :,112
+"def get_story_task_completed_body(payload: Dict[str, Any]) -> Optional[str]:
+    action = get_action_with_primary_id(payload)
+    kwargs = {
+        ""task_description"": action[""description""],
+    }
+    story_id = action[""story_id""]
+    for ref in payload[""references""]:
+        if ref[""id""] == story_id:
+            kwargs[""name_template""] = STORY_NAME_TEMPLATE.format(
+                name=ref[""name""],
+                app_url=ref[""app_url""],
+            )
+    if action[""changes""][""complete""][""new""]:
+        return STORY_TASK_COMPLETED_TEMPLATE.format(**kwargs)
+    else:
+        return None
+","if ref [ ""id"" ] == story_id :",188
+"def _create_valid_graph(graph):
+    nodes = graph.nodes()
+    for i in range(len(nodes)):
+        for j in range(len(nodes)):
+            if i == j:
+                continue
+            edge = (nodes[i], nodes[j])
+            if graph.has_edge(edge):
+                graph.del_edge(edge)
+            graph.add_edge(edge, 1)
+",if i == j :,112
+"def _post_order(op):
+    if isinstance(op, tvm.tir.Allocate):
+        lift_stmt[-1].append(op)
+        return op.body
+    if isinstance(op, tvm.tir.AttrStmt):
+        if op.attr_key == ""storage_scope"":
+            lift_stmt[-1].append(op)
+            return op.body
+        if op.attr_key == ""virtual_thread"":
+            return _merge_block(lift_stmt.pop() + [op], op.body)
+        return op
+    if isinstance(op, tvm.tir.For):
+        return _merge_block(lift_stmt.pop() + [op], op.body)
+    raise RuntimeError(""not reached"")
+","if op . attr_key == ""storage_scope"" :",188
+"def format_lazy_import(names):
+    """"""Formats lazy import lines""""""
+    lines = """"
+    for _, name, asname in names:
+        pkg, _, _ = name.partition(""."")
+        if asname is None:
+            line = ""{pkg} = _LazyModule.load({pkg!r}, {mod!r})\n""
+        else:
+            line = ""{asname} = _LazyModule.load({pkg!r}, {mod!r}, {asname!r})\n""
+        lines += line.format(pkg=pkg, mod=name, asname=asname)
+    return lines
+",if asname is None :,140
+"def evaluateWord(self, argument):
+    wildcard_count = argument[0].count(""*"")
+    if wildcard_count > 0:
+        if wildcard_count == 1 and argument[0].startswith(""*""):
+            return self.GetWordWildcard(argument[0][1:], method=""endswith"")
+        if wildcard_count == 1 and argument[0].endswith(""*""):
+            return self.GetWordWildcard(argument[0][:-1], method=""startswith"")
+        else:
+            _regex = argument[0].replace(""*"", "".+"")
+            matched = False
+            for w in self.words:
+                matched = bool(re.search(_regex, w))
+                if matched:
+                    break
+            return matched
+    return self.GetWord(argument[0])
+",if matched :,194
+"def setup(self, ir: ""IR"", aconf: Config) -> bool:
+    if self.kind == ""ConsulResolver"":
+        self.resolve_with = ""consul""
+        if not self.get(""datacenter""):
+            self.post_error(""ConsulResolver is required to have a datacenter"")
+            return False
+    elif self.kind == ""KubernetesServiceResolver"":
+        self.resolve_with = ""k8s""
+    elif self.kind == ""KubernetesEndpointResolver"":
+        self.resolve_with = ""k8s""
+    else:
+        self.post_error(f""Resolver kind {self.kind} unknown"")
+        return False
+    return True
+","if not self . get ( ""datacenter"" ) :",170
+"def get_success_url(self):
+    """"""Continue to the flow index or redirect according `?back` parameter.""""""
+    if ""back"" in self.request.GET:
+        back_url = self.request.GET[""back""]
+        if not is_safe_url(url=back_url, allowed_hosts={self.request.get_host()}):
+            back_url = ""/""
+        return back_url
+    return reverse(self.success_url)
+","if not is_safe_url ( url = back_url , allowed_hosts = { self . request . get_host ( ) } ) :",111
+"def download_main(
+    download, download_playlist, urls, playlist, output_dir, merge, info_only
+):
+    for url in urls:
+        if url.startswith(""https://""):
+            url = url[8:]
+        if not url.startswith(""http://""):
+            url = ""http://"" + url
+        if playlist:
+            download_playlist(
+                url, output_dir=output_dir, merge=merge, info_only=info_only
+            )
+        else:
+            download(url, output_dir=output_dir, merge=merge, info_only=info_only)
+","if not url . startswith ( ""http://"" ) :",155
+"def __str__(self):
+    buf = [""""]
+    if self.fileName:
+        buf.append(self.fileName + "":"")
+    if self.line != -1:
+        if not self.fileName:
+            buf.append(""line "")
+        buf.append(str(self.line))
+        if self.column != -1:
+            buf.append("":"" + str(self.column))
+        buf.append("":"")
+    buf.append("" "")
+    return str("""").join(buf)
+",if not self . fileName :,124
+"def parse_bash_set_output(output):
+    """"""Parse Bash-like 'set' output""""""
+    if not sys.platform.startswith(""win""):
+        # Replace ""\""-continued lines in *Linux* environment dumps.
+        # Cannot do this on Windows because a ""\"" at the end of the
+        # line does not imply a continuation.
+        output = output.replace(""\\\n"", """")
+    environ = {}
+    for line in output.splitlines(0):
+        line = line.rstrip()
+        if not line:
+            continue  # skip black lines
+        item = _ParseBashEnvStr(line)
+        if item:
+            environ[item[0]] = item[1]
+    return environ
+",if item :,177
+"def remove_selected(self):
+    """"""Removes selected items from list.""""""
+    to_delete = []
+    for i in range(len(self)):
+        if self[i].selected:
+            to_delete.append(i)
+    to_delete.reverse()
+    for i in to_delete:
+        self.pop(i)
+    if len(to_delete) > 0:
+        first_to_delete = to_delete[-1]
+        if first_to_delete == 0 and len(self) > 0:
+            self[0].selected = True
+        elif first_to_delete > 0:
+            self[first_to_delete - 1].selected = True
+",if first_to_delete == 0 and len ( self ) > 0 :,169
+"def update(self, update_tracks=True):
+    self.enable_update_metadata_images(False)
+    old_album_title = self.metadata[""album""]
+    self.metadata[""album""] = config.setting[""nat_name""]
+    for track in self.tracks:
+        if old_album_title == track.metadata[""album""]:
+            track.metadata[""album""] = self.metadata[""album""]
+        for file in track.linked_files:
+            track.update_file_metadata(file)
+    self.enable_update_metadata_images(True)
+    super().update(update_tracks)
+","if old_album_title == track . metadata [ ""album"" ] :",149
+"def on_input(self, target, message):
+    if message.strip() == """":
+        self.panel(""No commit message provided"")
+        return
+    if target:
+        command = [""git"", ""add""]
+        if target == ""*"":
+            command.append(""--all"")
+        else:
+            command.extend((""--"", target))
+        self.run_command(command, functools.partial(self.add_done, message))
+    else:
+        self.add_done(message, """")
+","if target == ""*"" :",125
+"def go_to_last_edit_location(self):
+    if self.last_edit_cursor_pos is not None:
+        filename, position = self.last_edit_cursor_pos
+        if not osp.isfile(filename):
+            self.last_edit_cursor_pos = None
+            return
+        else:
+            self.load(filename)
+            editor = self.get_current_editor()
+            if position < editor.document().characterCount():
+                editor.set_cursor_position(position)
+",if not osp . isfile ( filename ) :,135
+"def returnByType(self, results):
+    new_results = {}
+    for r in results:
+        type_name = r.get(""type"", ""movie"") + ""s""
+        if type_name not in new_results:
+            new_results[type_name] = []
+        new_results[type_name].append(r)
+    # Combine movies, needs a cleaner way..
+    if ""movies"" in new_results:
+        new_results[""movies""] = self.combineOnIMDB(new_results[""movies""])
+    return new_results
+",if type_name not in new_results :,144
+"def cache_sns_topics_across_accounts() -> bool:
+    function: str = f""{__name__}.{sys._getframe().f_code.co_name}""
+    # First, get list of accounts
+    accounts_d: list = async_to_sync(get_account_id_to_name_mapping)()
+    for account_id in accounts_d.keys():
+        if config.get(""environment"") == ""prod"":
+            cache_sns_topics_for_account.delay(account_id)
+        else:
+            if account_id in config.get(""celery.test_account_ids"", []):
+                cache_sns_topics_for_account.delay(account_id)
+    stats.count(f""{function}.success"")
+    return True
+","if account_id in config . get ( ""celery.test_account_ids"" , [ ] ) :",185
+"def get(self, subject, topic):
+    """"""Handles GET requests.""""""
+    if subject in feconf.AVAILABLE_LANDING_PAGES:
+        if topic in feconf.AVAILABLE_LANDING_PAGES[subject]:
+            self.render_template(""topic-landing-page.mainpage.html"")
+        else:
+            raise self.PageNotFoundException
+    else:
+        raise self.PageNotFoundException
+",if topic in feconf . AVAILABLE_LANDING_PAGES [ subject ] :,100
+"def callback(compiled):
+    if destpath is None:
+        logger.show_tabulated(
+            ""Compiled"", showpath(codepath), ""without writing to file.""
+        )
+    else:
+        with univ_open(destpath, ""w"") as opened:
+            writefile(opened, compiled)
+        logger.show_tabulated(""Compiled to"", showpath(destpath), ""."")
+    if self.show:
+        print(compiled)
+    if run:
+        if destpath is None:
+            self.execute(compiled, path=codepath, allow_show=False)
+        else:
+            self.execute_file(destpath)
+",if destpath is None :,166
+"def _find_start_index(self, string, start, end):
+    while True:
+        index = string.find(""{"", start, end) - 1
+        if index < 0:
+            return -1
+        if self._start_index_is_ok(string, index):
+            return index
+        start = index + 2
+","if self . _start_index_is_ok ( string , index ) :",84
+"def _get_nlu_target_format(export_path: Text) -> Text:
+    guessed_format = loading.guess_format(export_path)
+    if guessed_format not in {MARKDOWN, RASA, RASA_YAML}:
+        if rasa.shared.data.is_likely_json_file(export_path):
+            guessed_format = RASA
+        elif rasa.shared.data.is_likely_markdown_file(export_path):
+            guessed_format = MARKDOWN
+        elif rasa.shared.data.is_likely_yaml_file(export_path):
+            guessed_format = RASA_YAML
+    return guessed_format
+",elif rasa . shared . data . is_likely_yaml_file ( export_path ) :,166
+"def moveToThreadNext(self):
+    """"""Move a position to threadNext position.""""""
+    p = self
+    if p.v:
+        if p.v.children:
+            p.moveToFirstChild()
+        elif p.hasNext():
+            p.moveToNext()
+        else:
+            p.moveToParent()
+            while p:
+                if p.hasNext():
+                    p.moveToNext()
+                    break  # found
+                p.moveToParent()
+            # not found.
+    return p
+",if p . hasNext ( ) :,150
+"def copy_attributes(info_add, obj, name_fmt, attributes, formatter=None):
+    for attr in attributes:
+        value = getattr(obj, attr, None)
+        if value is None:
+            continue
+        name = name_fmt % attr
+        if formatter is not None:
+            value = formatter(attr, value)
+        info_add(name, value)
+",if value is None :,97
+"def getElement(self, aboutUri, namespace, name):
+    for desc in self.rdfRoot.getElementsByTagNameNS(RDF_NAMESPACE, ""Description""):
+        if desc.getAttributeNS(RDF_NAMESPACE, ""about"") == aboutUri:
+            attr = desc.getAttributeNodeNS(namespace, name)
+            if attr != None:
+                yield attr
+            for element in desc.getElementsByTagNameNS(namespace, name):
+                yield element
+","if desc . getAttributeNS ( RDF_NAMESPACE , ""about"" ) == aboutUri :",113

@@ -1,0 +1,656 @@
+cleaned_method,target_block,tokens_in_method
+"def __init__(self, scale, factor, mode):
+    self.index = 0
+    self.scale = scale
+    if factor is None:
+        self._log_factor = None
+    else:
+        if factor < 1.0:
+            raise ValueError(""'factor' must be >= 1.0"")
+        self._log_factor = np.log(factor)
+    if mode not in self.allowed_modes:
+        raise ValueError(
+            (""'{0}' is not a recognized mode. "" ""Please select from: {1}"").format(
+                mode, self.allowed_modes
+            )
+        )
+    self.mode = mode
+",if factor < 1.0 :,160
+"def get_grab_keys(self):
+    keystr = None
+    try:
+        keys = self.display.get_grab_keys()
+        for k in keys:
+            if keystr is None:
+                keystr = gtk.gdk.keyval_name(k)
+            else:
+                keystr = keystr + ""+"" + gtk.gdk.keyval_name(k)
+    except:
+        pass
+    return keystr
+",if keystr is None :,115
+"def _checkAllExamples(self, num_type):
+    for region_code in phonenumberutil.SUPPORTED_REGIONS:
+        numobj_py = phonenumberutil.example_number_for_type(region_code, num_type)
+        if numobj_py is not None:
+            numobj_pb = PyToPB(numobj_py)
+            alt_py = PBToPy(numobj_pb)
+            self.assertEqual(numobj_py, alt_py)
+",if numobj_py is not None :,127
+"def _gaf10iterator(handle):
+    for inline in handle:
+        if inline[0] == ""!"":
+            continue
+        inrec = inline.rstrip(""\n"").split(""\t"")
+        if len(inrec) == 1:
+            continue
+        inrec[3] = inrec[3].split(""|"")  # Qualifier
+        inrec[5] = inrec[5].split(""|"")  # DB:reference(s)
+        inrec[7] = inrec[7].split(""|"")  # With || From
+        inrec[10] = inrec[10].split(""|"")  # Synonym
+        inrec[12] = inrec[12].split(""|"")  # Taxon
+        yield dict(zip(GAF10FIELDS, inrec))
+",if len ( inrec ) == 1 :,188
+"def __xor__(self, other):
+    inc, exc = _norm_args_notimplemented(other)
+    if inc is NotImplemented:
+        return NotImplemented
+    if inc is NotImplemented:
+        return NotImplemented
+    if self._included is None:
+        if exc is None:  # - +
+            return _ComplementSet(excluded=self._excluded - inc)
+        else:  # - -
+            return _ComplementSet(included=self._excluded.symmetric_difference(exc))
+    else:
+        if inc is None:  # + -
+            return _ComplementSet(excluded=exc - self._included)
+        else:  # + +
+            return _ComplementSet(included=self._included.symmetric_difference(inc))
+",if exc is None :,183
+"def connection(self, commit_on_success=False):
+    with self._lock:
+        if self._bulk_commit:
+            if self._pending_connection is None:
+                self._pending_connection = sqlite.connect(self.filename)
+            con = self._pending_connection
+        else:
+            con = sqlite.connect(self.filename)
+        try:
+            if self.fast_save:
+                con.execute(""PRAGMA synchronous = 0;"")
+            yield con
+            if commit_on_success and self.can_commit:
+                con.commit()
+        finally:
+            if not self._bulk_commit:
+                con.close()
+",if not self . _bulk_commit :,182
+"def renderable_events(self, date, hour):
+    ""Returns the number of renderable events""
+    renderable_events = []
+    for event in self.events:
+        if event.covers(date, hour):
+            renderable_events.append(event)
+    if hour:
+        for current in renderable_events:
+            for event in self.events:
+                if event not in renderable_events:
+                    for hour in range(self.start_hour, self.end_hour):
+                        if current.covers(date, hour) and event.covers(date, hour):
+                            renderable_events.append(event)
+                            break
+    return renderable_events
+",if event not in renderable_events :,191
+"def _prepare_cooldowns(self, ctx):
+    if self._buckets.valid:
+        dt = ctx.message.edited_at or ctx.message.created_at
+        current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
+        bucket = self._buckets.get_bucket(ctx.message, current)
+        retry_after = bucket.update_rate_limit(current)
+        if retry_after:
+            raise CommandOnCooldown(bucket, retry_after)
+",if retry_after :,122
+"def TryMerge(self, d):
+    while d.avail() > 0:
+        tt = d.getVarInt32()
+        if tt == 10:
+            self.set_module(d.getPrefixedString())
+            continue
+        if tt == 18:
+            self.set_version(d.getPrefixedString())
+            continue
+        if tt == 24:
+            self.set_instances(d.getVarInt64())
+            continue
+        if tt == 0:
+            raise ProtocolBuffer.ProtocolBufferDecodeError
+        d.skipData(tt)
+",if tt == 18 :,150
+"def n_import_from(self, node):
+    relative_path_index = 0
+    if self.version >= 2.5:
+        if node[relative_path_index].pattr > 0:
+            node[2].pattr = (""."" * node[relative_path_index].pattr) + node[2].pattr
+        if self.version > 2.7:
+            if isinstance(node[1].pattr, tuple):
+                imports = node[1].pattr
+                for pattr in imports:
+                    node[1].pattr = pattr
+                    self.default(node)
+                return
+            pass
+    self.default(node)
+",if self . version > 2.7 :,170
+"def logic():
+    while 1:
+        yield a
+        var = 0
+        for i in downrange(len(a)):
+            if a[i] == 1:
+                var += 1
+        out.next = var
+",if a [ i ] == 1 :,61
+"def _extract_networks(self, server_node):
+    """"""Marshal the networks attribute of a parsed request""""""
+    node = self.find_first_child_named(server_node, ""networks"")
+    if node is not None:
+        networks = []
+        for network_node in self.find_children_named(node, ""network""):
+            item = {}
+            if network_node.hasAttribute(""uuid""):
+                item[""uuid""] = network_node.getAttribute(""uuid"")
+            if network_node.hasAttribute(""fixed_ip""):
+                item[""fixed_ip""] = network_node.getAttribute(""fixed_ip"")
+            networks.append(item)
+        return networks
+    else:
+        return None
+","if network_node . hasAttribute ( ""uuid"" ) :",186
+"def _model_shorthand(self, args):
+    accum = []
+    for arg in args:
+        if isinstance(arg, Node):
+            accum.append(arg)
+        elif isinstance(arg, Query):
+            accum.append(arg)
+        elif isinstance(arg, ModelAlias):
+            accum.extend(arg.get_proxy_fields())
+        elif isclass(arg) and issubclass(arg, Model):
+            accum.extend(arg._meta.declared_fields)
+    return accum
+","elif isinstance ( arg , Query ) :",125
+"def on_show_comment(self, widget, another):
+    if widget.get_active():
+        if another.get_active():
+            self.treeview.update_items(all=True, comment=True)
+        else:
+            self.treeview.update_items(comment=True)
+    else:
+        if another.get_active():
+            self.treeview.update_items(all=True)
+        else:
+            self.treeview.update_items()
+",if another . get_active ( ) :,121
+"def test_select_figure_formats_set():
+    ip = get_ipython()
+    for fmts in [
+        {""png"", ""svg""},
+        [""png""],
+        (""jpeg"", ""pdf"", ""retina""),
+        {""svg""},
+    ]:
+        active_mimes = {_fmt_mime_map[fmt] for fmt in fmts}
+        pt.select_figure_formats(ip, fmts)
+        for mime, f in ip.display_formatter.formatters.items():
+            if mime in active_mimes:
+                nt.assert_in(Figure, f)
+            else:
+                nt.assert_not_in(Figure, f)
+",if mime in active_mimes :,170
+"def update_from_data(self, data):
+    super(HelpParameter, self).update_from_data(data)
+    # original help.py value_sources are strings, update command strings to value-source dict
+    if self.value_sources:
+        self.value_sources = [
+            str_or_dict
+            if isinstance(str_or_dict, dict)
+            else {""link"": {""command"": str_or_dict}}
+            for str_or_dict in self.value_sources
+        ]
+","if isinstance ( str_or_dict , dict )",130
+"def _reset_library_root_logger() -> None:
+    global _default_handler
+    with _lock:
+        if not _default_handler:
+            return
+        library_root_logger = _get_library_root_logger()
+        library_root_logger.removeHandler(_default_handler)
+        library_root_logger.setLevel(logging.NOTSET)
+        _default_handler = None
+",if not _default_handler :,99
+"def extract_headers(headers):
+    """"""This function extracts valid headers from interactive input.""""""
+    sorted_headers = {}
+    matches = re.findall(r""(.*):\s(.*)"", headers)
+    for match in matches:
+        header = match[0]
+        value = match[1]
+        try:
+            if value[-1] == "","":
+                value = value[:-1]
+            sorted_headers[header] = value
+        except IndexError:
+            pass
+    return sorted_headers
+","if value [ - 1 ] == "","" :",125
+"def _call_user_data_handler(self, operation, src, dst):
+    if hasattr(self, ""_user_data""):
+        for key, (data, handler) in self._user_data.items():
+            if handler is not None:
+                handler.handle(operation, key, data, src, dst)
+",if handler is not None :,80
+"def update(self, other=None, **kwargs):
+    if other is not None:
+        if hasattr(other, ""items""):
+            other = other.items()
+        for key, value in other:
+            if key in kwargs:
+                raise TensorforceError.value(
+                    name=""NestedDict.update"",
+                    argument=""key"",
+                    value=key,
+                    condition=""specified twice"",
+                )
+            self[key] = value
+    for key, value in kwargs.items():
+        self[key] = value
+","if hasattr ( other , ""items"" ) :",153
+"def _restore_context(context):
+    # Check for changes in contextvars, and set them to the current
+    # context for downstream consumers
+    for cvar in context:
+        try:
+            if cvar.get() != context.get(cvar):
+                cvar.set(context.get(cvar))
+        except LookupError:
+            cvar.set(context.get(cvar))
+",if cvar . get ( ) != context . get ( cvar ) :,103
+"def __str__(self):
+    s = ""{""
+    sep = """"
+    for k, v in self.iteritems():
+        s += sep
+        if type(k) == str:
+            s += ""'%s'"" % k
+        else:
+            s += str(k)
+        s += "": ""
+        if type(v) == str:
+            s += ""'%s'"" % v
+        else:
+            s += str(v)
+        sep = "", ""
+    s += ""}""
+    return s
+",if type ( k ) == str :,131
+"def read_file_or_url(self, fname):
+    # TODO: not working on localhost
+    if isinstance(fname, file):
+        result = open(fname, ""r"")
+    else:
+        match = self.urlre.match(fname)
+        if match:
+            result = urllib.urlopen(match.group(1))
+        else:
+            fname = os.path.expanduser(fname)
+            try:
+                result = open(os.path.expanduser(fname), ""r"")
+            except IOError:
+                result = open(
+                    ""%s.%s"" % (os.path.expanduser(fname), self.defaultExtension), ""r""
+                )
+    return result
+",if match :,184
+"def subclass_managers(self, recursive):
+    for cls in self.class_.__subclasses__():
+        mgr = manager_of_class(cls)
+        if mgr is not None and mgr is not self:
+            yield mgr
+            if recursive:
+                for m in mgr.subclass_managers(True):
+                    yield m
+",if mgr is not None and mgr is not self :,89
+"def star_path(path):
+    """"""Replace integers and integer-strings in a path with *""""""
+    path = list(path)
+    for i, p in enumerate(path):
+        if isinstance(p, int):
+            path[i] = ""*""
+        else:
+            if not isinstance(p, text_type):
+                p = p.decode()
+            if r_is_int.match(p):
+                path[i] = ""*""
+    return join_path(path)
+",if r_is_int . match ( p ) :,127
+"def cookie_decode(data, key):
+    """"""Verify and decode an encoded string. Return an object or None""""""
+    if isinstance(data, unicode):
+        data = data.encode(""ascii"")  # 2to3 hack
+    if cookie_is_encoded(data):
+        sig, msg = data.split(u""?"".encode(""ascii""), 1)  # 2to3 hack
+        if sig[1:] == base64.b64encode(hmac.new(key, msg).digest()):
+            return pickle.loads(base64.b64decode(msg))
+    return None
+","if sig [ 1 : ] == base64 . b64encode ( hmac . new ( key , msg ) . digest ( ) ) :",137
+"def parse_row(cls, doc_row):
+    row = {}
+    for field_name, field in FIELD_MAP.items():
+        if len(doc_row) > field[1]:
+            field_value = doc_row[field[1]]
+        else:
+            field_value = """"
+        if len(field) >= 3 and callable(field[2]):
+            field_value = field[2](field_value)
+        row[field_name] = field_value
+    return row
+",if len ( field ) >= 3 and callable ( field [ 2 ] ) :,127
+"def semantic_masks(self):
+    for sid in self._seg_ids:
+        sinfo = self._sinfo.get(sid)
+        if sinfo is None or sinfo[""isthing""]:
+            # Some pixels (e.g. id 0 in PanopticFPN) have no instance or semantic predictions.
+            continue
+        yield (self._seg == sid).numpy().astype(np.bool), sinfo
+","if sinfo is None or sinfo [ ""isthing"" ] :",104
+"def top_level_subjects(self):
+    if self.subjects.exists():
+        return optimize_subject_query(self.subjects.filter(parent__isnull=True))
+    else:
+        # TODO: Delet this when all PreprintProviders have a mapping
+        if len(self.subjects_acceptable) == 0:
+            return optimize_subject_query(
+                Subject.objects.filter(parent__isnull=True, provider___id=""osf"")
+            )
+        tops = set([sub[0][0] for sub in self.subjects_acceptable])
+        return [Subject.load(sub) for sub in tops]
+",if len ( self . subjects_acceptable ) == 0 :,157
+"def resolve(obj):
+    if isinstance(obj, list):
+        for item in obj:
+            resolve(item)
+        return
+    if isinstance(obj, dict):
+        if ""$ref"" in obj:
+            with resolver.resolving(obj[u""$ref""]) as resolved:
+                resolve(resolved)
+                obj.clear()
+                obj.update(resolved)
+        else:
+            for value in obj.values():
+                resolve(value)
+","if ""$ref"" in obj :",127
+"def read_ansible_config(project_path, variables_of_interest):
+    fnames = [""/etc/ansible/ansible.cfg""]
+    if project_path:
+        fnames.append(os.path.join(project_path, ""ansible.cfg""))
+    values = {}
+    try:
+        parser = ConfigParser()
+        parser.read(fnames)
+        if ""defaults"" in parser:
+            for var in variables_of_interest:
+                if var in parser[""defaults""]:
+                    values[var] = parser[""defaults""][var]
+    except Exception:
+        logger.exception(""Failed to read ansible configuration(s) {}"".format(fnames))
+    return values
+","if var in parser [ ""defaults"" ] :",166
+"def test_globalphase():
+    rule_set = DecompositionRuleSet(modules=[globalphase, r2rzandph])
+    dummy = DummyEngine(save_commands=True)
+    eng = MainEngine(
+        dummy,
+        [AutoReplacer(rule_set), InstructionFilter(low_level_gates_noglobalphase)],
+    )
+    qubit = eng.allocate_qubit()
+    R(1.2) | qubit
+    rz_count = 0
+    for cmd in dummy.received_commands:
+        assert not isinstance(cmd.gate, R)
+        if isinstance(cmd.gate, Rz):
+            rz_count += 1
+            assert cmd.gate == Rz(1.2)
+    assert rz_count == 1
+","if isinstance ( cmd . gate , Rz ) :",188
+"def _kill_current_player(self):
+    if self._current_player:
+        if self.voice_client.is_paused():
+            self.voice_client.resume()
+        try:
+            self.voice_client.stop()
+        except OSError:
+            pass
+        self._current_player = None
+        return True
+    return False
+",if self . voice_client . is_paused ( ) :,93
+"def hasAmbiguousLanguage(self, p):
+    """"""Return True if p.b contains different @language directives.""""""
+    # c = self
+    languages, tag = set(), ""@language""
+    for s in g.splitLines(p.b):
+        if g.match_word(s, 0, tag):
+            i = g.skip_ws(s, len(tag))
+            j = g.skip_id(s, i)
+            word = s[i:j]
+            languages.add(word)
+    return len(list(languages)) > 1
+","if g . match_word ( s , 0 , tag ) :",140
+"def terminate(self):
+    n_retries = 10
+    for i in range(n_retries):
+        try:
+            super(MemmappingPool, self).terminate()
+            break
+        except OSError as e:
+            if isinstance(e, WindowsError):
+                # Workaround  occasional ""[Error 5] Access is denied"" issue
+                # when trying to terminate a process under windows.
+                sleep(0.1)
+                if i + 1 == n_retries:
+                    warnings.warn(
+                        ""Failed to terminate worker processes in""
+                        "" multiprocessing pool: %r"" % e
+                    )
+    self._temp_folder_manager._unlink_temporary_resources()
+",if i + 1 == n_retries :,192
+"def test_downsampling(self, method, maybe_range, fraction, expected_n_reads):
+    reader = sam.SamReader(
+        test_utils.genomics_core_testdata(""test.bam""),
+        downsample_fraction=fraction,
+        random_seed=12345,
+    )
+    with reader:
+        if method == ""iterate"":
+            reads_iter = reader.iterate()
+        elif method == ""query"":
+            reads_iter = reader.query(ranges.parse_literal(maybe_range))
+        else:
+            self.fail(""Unexpected method "" + str(method))
+        self.assertEqual(test_utils.iterable_len(reads_iter), expected_n_reads)
+","if method == ""iterate"" :",177
+"def verify_acceptable(self):
+    start = time.time()
+    while True:
+        if self.select_acceptable():
+            return
+        elif (time.time() - start) > READ_TIMEOUT:
+            raise Exception(""Server socket did not accept in time"")
+        time.sleep(0.1)
+",if self . select_acceptable ( ) :,79
+"def replica_local_creator(next_creator, **kwargs) -> tf.Variable:
+    """"""Variable creator that by default creates replica local variables.""""""
+    if kwargs[""synchronization""] == tf.VariableSynchronization.AUTO:
+        kwargs[""synchronization""] = tf.VariableSynchronization.ON_READ
+        if kwargs[""aggregation""] == tf.VariableAggregation.NONE:
+            kwargs[""aggregation""] = tf.VariableAggregation.ONLY_FIRST_REPLICA
+        if kwargs[""trainable""] is None:
+            kwargs[""trainable""] = True
+    return next_creator(**kwargs)
+","if kwargs [ ""aggregation"" ] == tf . VariableAggregation . NONE :",144
+"def get_optional_nargs(self, name):
+    for n, kwargs in self.conf[""optional_args""]:
+        if name == n:
+            if ""action"" in kwargs:
+                action = kwargs[""action""]
+                if action in (""store_true"", ""store_false""):
+                    return 0
+            break
+    return 1
+","if ""action"" in kwargs :",92
+"def ageToDays(self, age_str):
+    age = 0
+    age_str = age_str.replace(""&nbsp;"", "" "")
+    regex = ""(\d*.?\d+).(sec|hour|day|week|month|year)+""
+    matches = re.findall(regex, age_str)
+    for match in matches:
+        nr, size = match
+        mult = 1
+        if size == ""week"":
+            mult = 7
+        elif size == ""month"":
+            mult = 30.5
+        elif size == ""year"":
+            mult = 365
+        age += tryInt(nr) * mult
+    return tryInt(age)
+","elif size == ""year"" :",163
+"def put(self, userId, bucket, key, data):
+    if not self.initialized:
+        raise Exception(""archive not initialized"")
+    try:
+        uri = self.uri_for(userId, bucket, key)
+        if not self._save_content(uri, data):
+            raise Exception(""Failed writing file content to disk: {}"".format(uri))
+        else:
+            return uri
+    except Exception as err:
+        logger.debug(""cannot put data: exception - "" + str(err))
+        raise err
+","if not self . _save_content ( uri , data ) :",131
+"def get_range(min, max):
+    if max < min:
+        min, max = max, min
+    elif min == max:
+        if min < 0:
+            min, max = 2 * min, 0
+        elif min > 0:
+            min, max = 0, 2 * min
+        else:
+            min, max = -1, 1
+    return min, max
+",elif min > 0 :,99
+"def update_job_weights():
+    """"""Update job weights.""""""
+    for job in data_types.Job.query():
+        multiplier = DEFAULT_MULTIPLIER
+        if environment.is_engine_fuzzer_job(job.name):
+            targets_count = ndb.Key(data_types.FuzzTargetsCount, job.name).get()
+            # If the count is 0, it may be due to a bad build or some other issue. Use
+            # the default weight in that case to allow for recovery.
+            if targets_count and targets_count.count:
+                multiplier = targets_count.count
+                if multiplier > TARGET_COUNT_WEIGHT_CAP:
+                    multiplier = TARGET_COUNT_WEIGHT_CAP
+        update_job_weight(job.name, multiplier)
+",if multiplier > TARGET_COUNT_WEIGHT_CAP :,199
+"def _validate_required_settings(
+    self, application_id, application_config, required_settings, should_throw=True
+):
+    """"""All required keys must be present""""""
+    for setting_key in required_settings:
+        if setting_key not in application_config.keys():
+            if should_throw:
+                raise ImproperlyConfigured(
+                    MISSING_SETTING.format(
+                        application_id=application_id, setting=setting_key
+                    )
+                )
+            else:
+                return False
+    return True
+",if should_throw :,146
+"def nested_update(org_dict, upd_dict):
+    for key, value in upd_dict.items():
+        if isinstance(value, dict):
+            if key in org_dict:
+                if not isinstance(org_dict[key], dict):
+                    raise ValueError(
+                        ""Mismatch between org_dict and upd_dict at node {}"".format(key)
+                    )
+                nested_update(org_dict[key], value)
+            else:
+                org_dict[key] = value
+        else:
+            org_dict[key] = value
+",if key in org_dict :,161
+"def eintr_retry_call(func, *args, **kwargs):
+    while True:
+        try:
+            return func(*args, **kwargs)
+        except EnvironmentError as e:
+            if getattr(e, ""errno"", None) == errno.EINTR:
+                continue
+            raise
+","if getattr ( e , ""errno"" , None ) == errno . EINTR :",79
+"def __init__(self, entity):
+    self._entity = weakref.proxy(entity)
+    self._observables = collections.OrderedDict()
+    self._keys_helper = _ObservableKeys(self._entity, self._observables)
+    # Ensure consistent ordering.
+    for attr_name in sorted(dir(type(self))):
+        type_attr = getattr(type(self), attr_name)
+        if isinstance(type_attr, define.observable):
+            self._observables[attr_name] = getattr(self, attr_name)
+","if isinstance ( type_attr , define . observable ) :",131
+"def check_redundancy(self):
+    # Ensure there are no adjacent blocks (they should have been merged)
+    starts, sizes = self.allocator.get_allocated_regions()
+    last = -1
+    for start, size in zip(starts, sizes):
+        if start < last:
+            raise Exception(""Block at %d is out of order"" % start)
+        if start == last:
+            raise Exception(""Block at %d is redundant"" % start)
+        last = start + size
+",if start == last :,122
+"def elfheader():
+    local_path = pwndbg.file.get_file(pwndbg.proc.exe)
+    with open(local_path, ""rb"") as f:
+        elffile = ELFFile(f)
+        sections = []
+        for section in elffile.iter_sections():
+            start = section[""sh_addr""]
+            # Don't print sections that aren't mapped into memory
+            if start == 0:
+                continue
+            size = section[""sh_size""]
+            sections.append((start, start + size, section.name))
+        sections.sort()
+        for start, end, name in sections:
+            print(""%#x - %#x "" % (start, end), name)
+",if start == 0 :,189
+"def orbit():
+    """"""Define the internal thread for running the orbit.""""""
+    for point in points:
+        self.set_position(point)
+        self.set_focus(focus)
+        self.set_viewup(viewup)
+        self.renderer.ResetCameraClippingRange()
+        self.render()
+        time.sleep(step)
+        if write_frames:
+            self.write_frame()
+",if write_frames :,107

@@ -4,16 +4,20 @@ from transformers import (T5ForConditionalGeneration,
                           Trainer,
                           EarlyStoppingCallback)
 from datasets import Dataset, DatasetDict, load_dataset
+import codebleu
 from codebleu import calc_codebleu
 # from codebleu.utils import get_tree_sitter_language, PYTHON_LANGUAGE
 import pandas as pd
 import numpy as np
 import re
-import codebleu
 import evaluate
 import sacrebleu
 import tabulate
 import tree_sitter_python
+import pandas as pd
+import subprocess
+import re
+import sacrebleu
 
 
 # ------------------------------------------------------------------------
@@ -21,17 +25,17 @@ import tree_sitter_python
 # ------------------------------------------------------------------------
 
 # Load dataset from CSV files
-dataset = load_dataset('csv', data_files={'train': 'ft_train.csv', 'valid': 'ft_valid.csv', 'test': 'ft_test.csv'})
+dataset = load_dataset('csv', data_files={'train': 'ft_train_subset.csv', 'valid': 'ft_valid_subset.csv', 'test': 'ft_test_subset.csv'})
 
 # Convert DataFrame datasets to Hugging Face Dataset
 train_dataset = dataset['train']
 valid_dataset = dataset['valid']
 test_dataset = dataset['test']
 
-# DEMO: Randomly sample 5000 training set & 1000 for validation and 500 for test set
-train_dataset = train_dataset.shuffle(seed=42).select(range(400))
-valid_dataset = valid_dataset.shuffle(seed=42).select(range(100))
-test_dataset = test_dataset.shuffle(seed=42).select(range(100))
+# # DEMO: Randomly sample 5000 training set & 1000 for validation and 500 for test set
+# train_dataset = train_dataset.shuffle(seed=42).select(range(80))
+# valid_dataset = valid_dataset.shuffle(seed=42).select(range(10))
+# test_dataset = test_dataset.shuffle(seed=42).select(range(10))
 
 # Load pre-trained model from Hugging Face using the checkpoint name
 model_checkpoint = "Salesforce/codet5-small"
@@ -92,7 +96,7 @@ def flatten_and_mask(examples):
     examples['flattened_and_masked_method'] = flattened_and_masked_methods
     return examples
 
-dataset = dataset.map(flatten_and_mask, batched=True)
+dataset = dataset.map(flatten_and_mask, batched=True, num_proc=4)
 
 # ------------------------------------------------------------------------
 # 3. Fine-Tune Model Using Tokenizer
@@ -131,7 +135,7 @@ training_args = TrainingArguments(
     learning_rate=5e-5,
     per_device_train_batch_size=2,
     per_device_eval_batch_size=2,
-    num_train_epochs=5, # Change for testing
+    num_train_epochs=1, # Change for testing
     weight_decay=0.01,
     load_best_model_at_end=True,
     metric_for_best_model="eval_loss",
@@ -162,87 +166,67 @@ metrics = trainer.evaluate(tokenized_datasets["test"])
 print("Test Evaluation Metrics: ", metrics)
 
 # ------------------------------------------------------------------------
-# 7. Take Evaluation Metrics
+# 7. Take Evaluation Metrics and Save Results to CSV
 # ------------------------------------------------------------------------
-
-#Exact Match
-#This checks whether the predicted output exactly matches the reference output (character-by-character or token-by-token).
-def exact_match_score(predictions, references):
-    return sum(p.strip() == r.strip() for p, r in zip(predictions, references)) / len(predictions)
-
-#BLEU Score using SacreBLEU
-#This uses Hugging Face’s SacreBLEU metric.
+# Define the working directory for CodeBLEU calculation
+working_dir = "/content/CodeXGLUE/Code-Code/code-to-code-trans/evaluator/CodeBLEU/"
 
 def bleu_score(predictions, references):
-    sacrebleu = evaluate.load("sacrebleu")
-    formatted_references = [[ref] for ref in references]  # BLEU needs list of list
-    results = sacrebleu.compute(predictions=predictions, references=formatted_references)
-    return results["score"]
+    formatted_references = [[ref] for ref in references]
+    result = sacrebleu.corpus_bleu(predictions, formatted_references, smooth_method="exp")
+    return result.score / 100
 
-#BLEU Score using CodeBLEU
-#This uses a more specialized script from CodeBLEU to compute metric.
-#Might require some preprocessing or adjustment depending on formatting.
+# Create DataFrame to store results
+df = pd.DataFrame(columns=["input", "expected_if", "predicted_if", "code_bleu_score", "bleu_4_score"])
 
-def codebleu_score(predictions, references, lang="python"):
-    # Ensure predictions and references are lists of lists
-    if not isinstance(predictions[0], list):
-        predictions = [predictions]  # Wrap in a list if not already
-    if not isinstance(references[0], list):
-        references = [references]  # Wrap in a list if not already
-
-    # Use PYTHON_LANGUAGE directly instead of get_tree_sitter_language
-    res = calc_codebleu(references, predictions, lang=PYTHON_LANGUAGE)
-    print(res)
-    return res
-
-#Example data
-predictions = ["if x > 5:", "if y == 10:"]
-references = ["if x > 5:", "if y == 10:"]
-
-#Run evaluations
-exact_match = exact_match_score(predictions, references)
-# bleu = bleu_score(predictions, references)
-# codebleu = codebleu_score(predictions, references)
-
-#Print table
-table = [
-    ["Exact Match", f"{exact_match:.2f}"],
-    ["BLEU-4 (SacreBLEU)", f"{bleu:.2f}"],
-    ["CodeBLEU", f"{codebleu:.2f}"]
+# Define the command and arguments for CodeBLEU calculation
+command = [
+    "python",
+    "calc_code_bleu.py",
+    "--refs", "/content/expected_if.txt",
+    "--hyp", "/content/predicted_if.txt",
+    "--lang", "python",
+    "--params", "0.25,0.25,0.25,0.25"
 ]
 
-print(tabulate(table, headers=["Metric", "Score (%)"], tablefmt="grid"))
-
-# ------------------------------------------------------------------------
-# 8. Save Results to CSV
-# ------------------------------------------------------------------------
-
-# Create DataFrame to store test set results
-df = pd.DataFrame(columns=["input", "expected_if", "predicted_if"])  # "code_bleu", "bleu"
-
-# Populate with results
-# for i in range(len(tokenized_datasets["test"])):
-
-for i in range(30):
-    # Take cleaned method as input
+# Populate with results (limit to first 5 for testing)
+for i in range(5):  # Adjust based on your actual dataset size
     input_text = tokenized_datasets["test"][i]["flattened_and_masked_method"]
-
-    # Pull target block as the expected if statement
     expected_if = tokenized_datasets["test"][i]["target_block"]
 
-    # Decode the prediction
+    # Decode the predicted output from the model
     inputs = tokenizer(input_text, return_tensors="pt")
     output = model.generate(**inputs, max_length=256)
     token_ids = output[0]
     predicted_if = tokenizer.decode(token_ids, skip_special_tokens=True)
 
-    # Produce evaluation scores
-    code_bleu = codebleu_score([predicted_if], [expected_if])
-    bleu = bleu_score([predicted_if], [expected_if])
-    exact_match = exact_match_score([predicted_if], [expected_if])
+    # Save predicted_if and expected_if to text files for BLEU calculation
+    with open('/content/predicted_if.txt', 'w') as f:
+        f.write(predicted_if)
 
-    # Save each input's results to DataFrame
-    df.loc[i] = [input_text, expected_if, predicted_if]  # code_bleu, bleu
+    with open('/content/expected_if.txt', 'w') as f:
+        f.write(expected_if)
 
-# Convert DataFrame to CSV file
-df.to_csv("testset-results.csv", index=False)
+    # Run the CodeBLEU calculation command
+    result = subprocess.run(command, cwd=working_dir, capture_output=True, text=True)
+
+    # Extract CodeBLEU score from the result using regex
+    pattern = r'CodeBLEU\s+score:\s*([0-9]*\.?[0-9]+)'
+    matches = re.findall(pattern, result.stdout)
+
+    if matches:
+        code_bleu_score = float(matches[0])  # CodeBLEU score
+    else:
+        code_bleu_score = 0.0  # Default to 0 if no match found
+
+    # Calculate BLEU-4 score using sacrebleu
+    bleu_4_score = bleu_score([predicted_if], [expected_if])
+
+    # Save the results to the DataFrame
+    df.loc[len(df)] = [input_text, expected_if, predicted_if, code_bleu_score, bleu_4_score]
+
+# Save the results to a CSV
+df.to_csv("/content/testset-results.csv", index=False)
+
+# Optionally print the DataFrame to see the results
+print(df)
