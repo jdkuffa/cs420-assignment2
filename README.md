@@ -68,6 +68,12 @@ Install the required dependencies:
 pip install -r requirements.txt
 ```
 
+
+Clone the CodeXGLUE repository. This is needed to calculate the CodeBLEU score. 
+```
+git clone -q https://github.com/microsoft/CodeXGLUE.git
+```
+
 ## **2.3 Run Program**
 
 1. Run ```main.py```
