@@ -17,8 +17,7 @@ from datasets import load_dataset
 # 1. Load Dataset
 # ------------------------------------------------------------------------
 # Load dataset from CSV files
-#dataset = load_dataset('csv', data_files={'train': 'ft_train.csv', 'valid': 'ft_valid.csv', 'test': 'ft_test.csv'})
-dataset = load_dataset('csv', data_files={'train': 'ft_train_subset.csv', 'valid': 'ft_valid_subset.csv', 'test': 'ft_test_subset.csv'})
+dataset = load_dataset('csv', data_files={'train': 'ft_train.csv', 'valid': 'ft_valid.csv', 'test': 'ft_test.csv'})
 
 # Convert DataFrame datasets to Hugging Face Dataset
 train_dataset = dataset['train']
@@ -173,7 +172,7 @@ print("Test Evaluation Metrics: ", metrics)
 def bleu_score(predictions, references):
     formatted_references = [[ref] for ref in references]
     result = sacrebleu.corpus_bleu(predictions, formatted_references, smooth_method="exp")
-    return result.score / 100
+    return result.score 
 
 def exact_match_score(predictions, references):
     return sum(p.strip() == r.strip() for p, r in zip(predictions, references)) / len(predictions)
@@ -192,7 +191,7 @@ for i in range(len(tokenized_datasets["test"])):
     output = model.generate(**inputs, max_length=256)
     predicted_if = tokenizer.decode(output[0], skip_special_tokens=True)
 
-    code_bleu_score = sacrebleu.sentence_bleu(predicted_if, [expected_if]).score / 100
+    code_bleu_score = sacrebleu.sentence_bleu(predicted_if, [expected_if]).score
     bleu_4_score = bleu_score([predicted_if], [expected_if])
 
     exact_match = exact_match_score([predicted_if], [expected_if])
